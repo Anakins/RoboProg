@@ -489,6 +489,50 @@ class RoboProg extends eqLogic {
 
     // Vérifie que la condition météo actuelle (code numérique) fait
     // partie de la liste figée ci-dessus. Même principe que LandroidRTK.
+    // Emojis standards (indépendants de tout plugin météo), sélectionnés
+    // à partir des familles de codes OpenWeatherMap ET WeatherAPI.com (les
+    // deux sources supportées par le plugin météo générique). Un seul
+    // emoji par grande famille (orage, bruine, pluie, neige/grésil) —
+    // brume/poussière et tornade/vent violent ne sont volontairement pas
+    // catégorisées (retombent sur l'inconnu).
+    private static function getEmoji($condition_id) {
+        if ($condition_id === null || $condition_id === '') {
+            return '❔';
+        }
+        $id = intval($condition_id);
+        if ($id == 800) return '☀️';
+        if ($id == 801) return '🌤️';
+        if ($id == 802) return '⛅';
+        if ($id == 803) return '🌥️';
+        if ($id == 804) return '☁️';
+        if ($id == 1000) return '☀️';
+        if ($id == 1003) return '🌤️';
+        if ($id == 1006) return '⛅';
+        if ($id == 1009) return '☁️';
+
+        if ($id >= 200 && $id < 300) return '⛈️';
+        if (in_array($id, array(1087, 1273, 1276, 1279, 1282))) return '⛈️';
+
+        if ($id >= 300 && $id < 400) return '🌦️';
+        if (in_array($id, array(1063, 1072, 1150, 1153, 1168))) return '🌦️';
+
+        if ($id >= 500 && $id < 600) return '🌧️';
+        if (in_array($id, array(1171, 1180, 1183, 1186, 1189, 1192, 1195, 1198, 1201, 1240, 1243, 1246))) return '🌧️';
+
+        if ($id >= 600 && $id < 700) return '❄️';
+        if (in_array($id, array(1066, 1069, 1114, 1117, 1204, 1207, 1210, 1213, 1216, 1219, 1222, 1225, 1237, 1249, 1252, 1255, 1258, 1261, 1264))) return '❄️';
+
+        // --- Brume / brouillard / poussière / fumée ---
+        if (in_array($id, array(701, 711, 721, 731, 741, 751, 761, 762))) return '😶‍🌫️';
+        if (in_array($id, array(1012, 1015, 1018, 1030, 1033, 1036, 1039, 1042, 1045, 1048, 1135, 1147))) return '😶‍🌫️';
+
+        // --- Tornade / vent violent ---
+        if (in_array($id, array(771, 781))) return '🌪️';
+        if (in_array($id, array(1021, 1024, 1027))) return '🌪️';
+
+        return '❔';
+    }
+
     private static function isGoodWeather($config) {
         $condition_id = self::getCmdValue($config['condition_id_cmd_id']);
         if ($condition_id === null || $condition_id === '' || !is_numeric($condition_id)) {
@@ -975,7 +1019,12 @@ class RoboProg extends eqLogic {
             if (is_object($start_cmd)) {
                 $humidity_val = self::getCmdValue($config['humidity_cmd_id']);
                 $battery_val = !empty($config['battery_cmd_id']) ? self::getCmdValue($config['battery_cmd_id']) : null;
+                $emoji = self::getEmoji(self::getCmdValue($config['condition_id_cmd_id']));
+                $condition_label = self::getCmdValue($config['condition_cmd_id']);
                 $msg_parts = array("✂️ {$config['robot_name']} va tondre la pelouse.");
+                if (!empty($condition_label)) {
+                    $msg_parts[] = "$emoji $condition_label";
+                }
                 if (!empty($config['temperature_cmd_id'])) {
                     $temp_val = self::getCmdValue($config['temperature_cmd_id']);
                     if ($temp_val !== null && is_numeric($temp_val)) {
