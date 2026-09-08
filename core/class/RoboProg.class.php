@@ -815,7 +815,14 @@ class RoboProg extends eqLogic {
             $during_mow = !empty($state['current_mow_started_at']) && (time() - $state['current_mow_started_at']) <= $mow_duration_seconds;
             $during_edge = !empty($state['current_edge_started_at']) && (time() - $state['current_edge_started_at']) <= $mow_duration_seconds;
 
-            if (!empty($config['home_cmd_id'])) {
+            // Avant d'envoyer la commande de retour, on vérifie si on sait
+            // que le robot est déjà à la maison (via status_cmd_id +
+            // status_home_value, si configurés) — évite de solliciter le
+            // robot/l'API pour rien un jour sans tonte où il est déjà
+            // rentré. Si l'info n'est pas configurée/déterminable
+            // (isRobotHome() renvoie null), on envoie quand même la
+            // commande par sécurité (comportement inchangé dans ce cas).
+            if (!empty($config['home_cmd_id']) && self::isRobotHome($config) !== true) {
                 $home_cmd = self::resolveCmd($config['home_cmd_id']);
                 if (is_object($home_cmd)) {
                     $home_cmd->execCmd();
@@ -1035,9 +1042,10 @@ class RoboProg extends eqLogic {
                 if ($battery_val !== null && is_numeric($battery_val)) {
                     $msg_parts[] = "🔋 Batterie : {$battery_val}%.";
                 }
-                $text = implode(' ', $msg_parts);
+                $msg_html = implode('<br/>', $msg_parts);
+                $msg_plain = implode("\n", $msg_parts);
                 $name = strtoupper($config['robot_name']);
-                self::sendNotifications($config, "$name - TONTE", $text, $text);
+                self::sendNotifications($config, "$name - TONTE", $msg_html, $msg_plain);
 
                 $start_cmd->execCmd();
                 $state['last_mow_date'] = $today;
