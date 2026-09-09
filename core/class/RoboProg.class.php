@@ -1087,7 +1087,9 @@ class RoboProg extends eqLogic {
 
     // Notification de fin de journée si la tonte classique n'a pas pu
     // avoir lieu (mêmes principes que LandroidRTK : une fois la fenêtre
-    // fermée, une seule fois par jour).
+    // fermée, une seule fois par jour ; même structure multi-lignes que
+    // la notification de démarrage — annonce → météo → température →
+    // humidité → batterie).
     private static function notifyNotReadyIfNeeded($eqLogic, $config, $state, $today, $now_minutes, $latest_start, $spacing_ok) {
         if ($now_minutes <= $latest_start) {
             return; // fenêtre encore ouverte
@@ -1108,8 +1110,38 @@ class RoboProg extends eqLogic {
             'rain' => "pluie détectée",
             'weather' => "conditions météo/sécurité non réunies",
         );
-        $text = "❌ {$config['robot_name']} ne tondra pas aujourd'hui : {$labels[$reason]}.";
-        self::sendNotifications($config, "$name - PAS DE TONTE", $text, $text, 'no_mow');
+
+        $msg_parts = array("💤 {$config['robot_name']} ne tondra pas aujourd'hui : {$labels[$reason]}.");
+
+        if (!empty($config['condition_cmd_id'])) {
+            $condition_label = self::getCmdValue($config['condition_cmd_id']);
+            if (!empty($condition_label)) {
+                $emoji = self::getEmoji(self::getCmdValue($config['condition_id_cmd_id']));
+                $msg_parts[] = "$emoji Condition météo actuelle : $condition_label";
+            }
+        }
+        if (!empty($config['temperature_cmd_id'])) {
+            $temp_val = self::getCmdValue($config['temperature_cmd_id']);
+            if ($temp_val !== null && is_numeric($temp_val)) {
+                $msg_parts[] = "🌡️ La température est actuellement de {$temp_val}°C";
+            }
+        }
+        if (!empty($config['humidity_cmd_id'])) {
+            $humidity_val = self::getCmdValue($config['humidity_cmd_id']);
+            if ($humidity_val !== null && is_numeric($humidity_val)) {
+                $msg_parts[] = "💧 L'humidité actuelle est de {$humidity_val}%";
+            }
+        }
+        if (!empty($config['battery_cmd_id'])) {
+            $battery_val = self::getCmdValue($config['battery_cmd_id']);
+            if ($battery_val !== null && is_numeric($battery_val)) {
+                $msg_parts[] = "🔋 La batterie est actuellement de {$battery_val}%";
+            }
+        }
+
+        $msg_html = implode('<br/>', $msg_parts);
+        $msg_plain = implode("\n", $msg_parts);
+        self::sendNotifications($config, "$name - PAS DE TONTE", $msg_html, $msg_plain, 'no_mow');
         $state['last_notification_reason'] = $reason;
         $state['last_notification_date'] = $today;
         self::saveState($eqLogic, $state);
