@@ -1,5 +1,9 @@
 # Changelog RoboProg
 
+## Non publié
+- **Amélioration** : le message "bordures du jour" est désormais **scindé en deux notifications distinctes** selon qu'un enchaînement sur la tonte classique est prévu ou non ("BORDURES + TONTE" vs "BORDURES"), et les deux reçoivent maintenant les mêmes infos météo/batterie enrichies (emoji+condition, température, humidité, batterie) avec retours à la ligne, comme la notification de tonte classique. Ajout d'une fonction interne partagée (`buildWeatherLines`) pour construire ces lignes une seule fois et éviter toute divergence future entre les différents messages de démarrage — la notification "TONTE" classique a été alignée dessus au passage.
+- **Amélioration (tableau de diagnostic)** : la ligne "Espacement jours de tontes respecté" affichait "Non" un jour de bordures, ce qui donnait à tort l'impression que rien n'allait démarrer alors que les bordures (et éventuellement la tonte classique enchaînée) allaient bien se lancer — l'espacement classique ne s'applique pas aux jours de bordures. Elle affiche désormais "OK — Non requis aujourd'hui, couvert par les bordures" dans ce cas. La ligne "Type de prochaine tonte" est renommée "Tonte prévue aujourd'hui" pour préciser plus clairement qu'elle répond à "que va-t-il se passer aujourd'hui" (bordures, bordures+tonte, tonte classique, ou rien).
+
 ## 0.1.0 (2026-09-06)
 - Première version : planificateur de tonte générique, compatible avec n'importe quel robot déjà intégré à Jeedom.
 - Socle repris de LandroidRTK (plage horaire, espacement, météo, notifications par destinataire, outils de débogage), généralisé via des commandes liées (tags) plutôt qu'une intégration cloud dédiée — **aucune dépendance externe** (pas de Python, pas d'environnement virtuel).

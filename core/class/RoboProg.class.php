@@ -533,6 +533,40 @@ class RoboProg extends eqLogic {
         return '❔';
     }
 
+    // Construit les lignes météo/batterie standard (emoji+condition,
+    // température, humidité, batterie) utilisées par tous les messages
+    // de démarrage (tonte classique, bordures, bordures+enchaînement).
+    // Chaque ligne n'est ajoutée que si la donnée correspondante est
+    // configurée et disponible, exactement comme pour la notification
+    // "TONTE" d'origine.
+    private static function buildWeatherLines($config) {
+        $lines = array();
+        $condition_label = self::getCmdValue($config['condition_cmd_id']);
+        if (!empty($condition_label)) {
+            $emoji = self::getEmoji(self::getCmdValue($config['condition_id_cmd_id']));
+            $lines[] = "$emoji $condition_label";
+        }
+        if (!empty($config['temperature_cmd_id'])) {
+            $temp_val = self::getCmdValue($config['temperature_cmd_id']);
+            if ($temp_val !== null && is_numeric($temp_val)) {
+                $lines[] = "🌡️ La température est de {$temp_val}°C.";
+            }
+        }
+        if (!empty($config['humidity_cmd_id'])) {
+            $humidity_val = self::getCmdValue($config['humidity_cmd_id']);
+            if ($humidity_val !== null && is_numeric($humidity_val)) {
+                $lines[] = "💧 L'humidité est de {$humidity_val}%.";
+            }
+        }
+        if (!empty($config['battery_cmd_id'])) {
+            $battery_val = self::getCmdValue($config['battery_cmd_id']);
+            if ($battery_val !== null && is_numeric($battery_val)) {
+                $lines[] = "🔋 Batterie : {$battery_val}%.";
+            }
+        }
+        return $lines;
+    }
+
     private static function isGoodWeather($config) {
         $condition_id = self::getCmdValue($config['condition_id_cmd_id']);
         if ($condition_id === null || $condition_id === '' || !is_numeric($condition_id)) {
@@ -674,12 +708,38 @@ class RoboProg extends eqLogic {
             $rows[] = array('label' => 'Statut', 'ok' => true, 'detail' => $status_detail);
         }
 
-        $rows[] = array('label' => 'Type de prochaine tonte', 'ok' => true, 'detail' => self::estimateNextMowShort($eqLogic, $config));
+        $rows[] = array('label' => 'Tonte prévue aujourd\'hui', 'ok' => true, 'detail' => self::estimateNextMowShort($eqLogic, $config));
+
+        // L'espacement (jours entre deux tontes CLASSIQUES) ne bloque
+        // rien un jour de bordures : les bordures ont leur propre
+        // calendrier indépendant. On le calcule ici pour ne pas afficher
+        // à tort un "Non" qui donnerait l'impression que rien ne va se
+        // passer aujourd'hui, alors que les bordures (et éventuellement
+        // la tonte classique juste après) vont bien démarrer.
+        $edge_available = !empty($config['edge_cmd_id']);
+        $edge_due_today = false;
+        if ($edge_available && $state['last_edge_date'] !== $today) {
+            if ($config['edge_mode'] == 'weekday') {
+                $edge_due_today = self::isWeekdayDue($config['edge_weekdays']);
+            } else {
+                if (empty($state['last_edge_date'])) {
+                    $edge_due_today = true;
+                } else {
+                    $diff_edge = (strtotime($today) - strtotime($state['last_edge_date'])) / 86400;
+                    $edge_due_today = ($diff_edge >= intval($config['edge_interval_days']));
+                }
+            }
+        }
+        $edge_covers_today = $edge_due_today || (!empty($state['edge_catchup_pending']) && $config['edge_catchup_enabled'] == '1');
 
         if (!empty($state['last_mow_date'])) {
             $diff_days = (strtotime($today) - strtotime($state['last_mow_date'])) / 86400;
             $ok = $diff_days >= intval($config['spacing_days']);
-            $add('Espacement jours de tontes respecté', $ok, $ok ? "OK" : (intval($diff_days) . " jour(s) depuis la dernière tonte (min. " . $config['spacing_days'] . ")"));
+            if (!$ok && $edge_covers_today) {
+                $add('Espacement jours de tontes respecté', true, "Non requis aujourd'hui — couvert par les bordures (" . intval($diff_days) . " jour(s) depuis la dernière tonte classique, min. " . $config['spacing_days'] . ")");
+            } else {
+                $add('Espacement jours de tontes respecté', $ok, $ok ? "OK" : (intval($diff_days) . " jour(s) depuis la dernière tonte (min. " . $config['spacing_days'] . ")"));
+            }
         } else {
             $add('Espacement jours de tontes respecté', true, "Aucune tonte enregistrée");
         }
@@ -1012,11 +1072,27 @@ class RoboProg extends eqLogic {
                 log::add('RoboProg', 'info', $config['robot_name'] . " : coupe des bordures programmée du jour déclenchée.");
                 $name = strtoupper($config['robot_name']);
                 if ($config['edge_resume_enabled'] == '1') {
-                    $text = "✂️ {$config['robot_name']} va d'abord couper les bordures, puis repartira pour la tonte classique.";
+                    // Bordures + enchaînement prévu sur la tonte classique :
+                    // message distinct de "bordures seules", annonçant
+                    // clairement l'enchaînement, avec les mêmes infos
+                    // météo/batterie que la notification de tonte classique.
+                    $msg_parts = array_merge(
+                        array("✂️🔁 {$config['robot_name']} va d'abord couper les bordures, puis enchaînera sur la tonte classique."),
+                        self::buildWeatherLines($config)
+                    );
+                    $msg_html = implode('<br/>', $msg_parts);
+                    $msg_plain = implode("\n", $msg_parts);
+                    self::sendNotifications($config, "$name - BORDURES + TONTE", $msg_html, $msg_plain);
                 } else {
-                    $text = "✂️ {$config['robot_name']} va couper les bordures.";
+                    // Bordures seules, pas d'enchaînement prévu.
+                    $msg_parts = array_merge(
+                        array("✂️ {$config['robot_name']} va couper les bordures."),
+                        self::buildWeatherLines($config)
+                    );
+                    $msg_html = implode('<br/>', $msg_parts);
+                    $msg_plain = implode("\n", $msg_parts);
+                    self::sendNotifications($config, "$name - BORDURES", $msg_html, $msg_plain);
                 }
-                self::sendNotifications($config, "$name - BORDURES", $text, $text);
                 return;
             }
         }
@@ -1024,24 +1100,10 @@ class RoboProg extends eqLogic {
         if ($spacing_ok) {
             $start_cmd = self::resolveCmd($config['start_cmd_id']);
             if (is_object($start_cmd)) {
-                $humidity_val = self::getCmdValue($config['humidity_cmd_id']);
-                $battery_val = !empty($config['battery_cmd_id']) ? self::getCmdValue($config['battery_cmd_id']) : null;
-                $emoji = self::getEmoji(self::getCmdValue($config['condition_id_cmd_id']));
-                $condition_label = self::getCmdValue($config['condition_cmd_id']);
-                $msg_parts = array("✂️ {$config['robot_name']} va tondre la pelouse.");
-                if (!empty($condition_label)) {
-                    $msg_parts[] = "$emoji $condition_label";
-                }
-                if (!empty($config['temperature_cmd_id'])) {
-                    $temp_val = self::getCmdValue($config['temperature_cmd_id']);
-                    if ($temp_val !== null && is_numeric($temp_val)) {
-                        $msg_parts[] = "🌡️ La température est de {$temp_val}°C.";
-                    }
-                }
-                $msg_parts[] = "💧 L'humidité est de {$humidity_val}%.";
-                if ($battery_val !== null && is_numeric($battery_val)) {
-                    $msg_parts[] = "🔋 Batterie : {$battery_val}%.";
-                }
+                $msg_parts = array_merge(
+                    array("✂️ {$config['robot_name']} va tondre la pelouse."),
+                    self::buildWeatherLines($config)
+                );
                 $msg_html = implode('<br/>', $msg_parts);
                 $msg_plain = implode("\n", $msg_parts);
                 $name = strtoupper($config['robot_name']);
