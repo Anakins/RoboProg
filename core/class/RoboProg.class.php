@@ -626,6 +626,73 @@ class RoboProg extends eqLogic {
         return is_array($edge_weekdays) && in_array($today_n, array_map('strval', $edge_weekdays));
     }
 
+    // Cherche la prochaine date (à partir de $fromDate inclus) qui tombe
+    // sur l'un des jours de semaine configurés pour les bordures.
+    // Retourne null si aucun jour n'est configuré.
+    private static function findNextWeekday($edge_weekdays, $fromDate) {
+        if (!is_array($edge_weekdays) || empty($edge_weekdays)) {
+            return null;
+        }
+        $wanted = array_map('strval', $edge_weekdays);
+        for ($i = 0; $i < 7; $i++) {
+            $d = date('Y-m-d', strtotime($fromDate . " +$i days"));
+            if (in_array((string) date('N', strtotime($d)), $wanted)) {
+                return $d;
+            }
+        }
+        return null;
+    }
+
+    // Estime la date de la PROCHAINE tonte (classique et/ou bordures) et
+    // son type, pour affichage dans la notification "PAS DE TONTE".
+    // Volontairement simplifié par rapport à estimateNextMow() : ne
+    // cherche que le jour et le type, pas une heure précise ni les cas
+    // "indéterminé" liés à l'humidité en cours de stabilisation.
+    private static function estimateNextMowDateType($eqLogic, $config) {
+        $state = self::getState($eqLogic);
+        $today = date('Y-m-d');
+        $tomorrow = date('Y-m-d', strtotime('+1 day'));
+
+        // Prochaine date où l'espacement de la tonte classique sera respecté.
+        if (!empty($state['last_mow_date'])) {
+            $next_classic_date = date('Y-m-d', strtotime($state['last_mow_date'] . " +{$config['spacing_days']} days"));
+        } else {
+            $next_classic_date = $today;
+        }
+        // Cette estimation est utilisée en fin de journée (fenêtre déjà
+        // fermée) : la prochaine tentative ne peut de toute façon pas
+        // être avant demain.
+        if ($next_classic_date <= $today) {
+            $next_classic_date = $tomorrow;
+        }
+
+        // Prochaine date de coupe des bordures, le cas échéant.
+        $edge_available = !empty($config['edge_cmd_id']);
+        $next_edge_date = null;
+        if ($edge_available) {
+            if (!empty($state['edge_catchup_pending']) && $config['edge_catchup_enabled'] == '1') {
+                // Le rattrapage ne se fait que le jour où la classique est
+                // de toute façon due : même date que $next_classic_date.
+                $next_edge_date = $next_classic_date;
+            } elseif ($config['edge_mode'] == 'weekday') {
+                $next_edge_date = self::findNextWeekday($config['edge_weekdays'], $tomorrow);
+            } else {
+                $base = !empty($state['last_edge_date']) ? $state['last_edge_date'] : $today;
+                $candidate = date('Y-m-d', strtotime($base . " +{$config['edge_interval_days']} days"));
+                $next_edge_date = ($candidate <= $today) ? $tomorrow : $candidate;
+            }
+        }
+
+        if ($next_edge_date !== null && $next_edge_date == $next_classic_date) {
+            $type = ($config['edge_resume_enabled'] == '1') ? 'BORDURES + TONTE' : 'BORDURES';
+            return array('date' => $next_classic_date, 'type' => $type);
+        }
+        if ($next_edge_date !== null && $next_edge_date < $next_classic_date) {
+            return array('date' => $next_edge_date, 'type' => 'BORDURES');
+        }
+        return array('date' => $next_classic_date, 'type' => 'TONTE');
+    }
+
     /* ================================================================ */
     /* Notifications (mêmes conventions que LandroidRTK : filtre par     */
     /* type + case à cocher par destinataire)                            */
@@ -1174,6 +1241,11 @@ class RoboProg extends eqLogic {
         );
 
         $msg_parts = array("💤 {$config['robot_name']} ne tondra pas aujourd'hui : {$labels[$reason]}.");
+
+        $next = self::estimateNextMowDateType($eqLogic, $config);
+        if ($next['date'] !== null) {
+            $msg_parts[] = "📅 Prochaine tonte prévue le " . date('d/m/Y', strtotime($next['date'])) . " ({$next['type']}).";
+        }
 
         if (!empty($config['condition_cmd_id'])) {
             $condition_label = self::getCmdValue($config['condition_cmd_id']);
