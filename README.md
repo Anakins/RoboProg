@@ -73,7 +73,7 @@ Ce mécanisme peut générer **jusqu'à deux notifications distinctes** : une au
 ## 6. Notifications
 
 Autant de commandes que voulu (Discord, appli mobile...), avec titre personnalisable et choix du format (HTML avec `<br/>`, ou texte brut). Quatre cases à cocher par destinataire permettent de choisir précisément qui reçoit quoi :
-- **Pas de tonte** (cochée par défaut) : envoyée en fin de fenêtre horaire si la tonte classique n'a pas pu avoir lieu.
+- **Pas de tonte** (cochée par défaut) : envoyée en fin de fenêtre horaire si la tonte classique n'a pas pu avoir lieu. Précise systématiquement la date de la prochaine tonte prévue, avec son **type entre parenthèses** — `(TONTE)`, `(BORDURES)` ou `(BORDURES + TONTE)` — puisque cette prochaine échéance peut tout aussi bien être une tonte classique qu'un jour de bordures.
 - **Erreur** (décochée par défaut) : si une commande Erreur est liée.
 - **Rattrapage bordures** / **Relance** (décochées par défaut) : les deux notifications du mécanisme de bordures décrit ci-dessus.
 
@@ -83,7 +83,7 @@ En haut de l'onglet Programmation, juste sous les boutons Tester/Sauvegarder : u
 
 ## 8. État des conditions de démarrage
 
-En haut de l'onglet Programmation (visible uniquement quand elle est active) : un tableau détaillant, condition par condition, ce qui est actuellement réuni ou non pour démarrer (espacement, pluie, humidité avec délai, température, condition météo, batterie), plus une ligne dédiée indiquant le **type de la prochaine tonte** (classique / bordures / rattrapage / rattrapage puis classique). Rafraîchi automatiquement à l'ouverture de l'onglet et après chaque sauvegarde, avec un bouton pour le rafraîchir manuellement.
+En haut de l'onglet Programmation (visible uniquement quand elle est active) : un tableau détaillant, condition par condition, ce qui est actuellement réuni ou non pour démarrer (espacement, pluie, humidité avec délai, température, condition météo, batterie), plus une ligne dédiée **"Tonte prévue aujourd'hui"** indiquant clairement ce qui va se passer le jour même (classique / bordures / bordures puis classique / rattrapage / rien). Sur un jour de bordures, la ligne "Espacement" ne s'affiche plus en échec puisqu'elle ne s'applique qu'à la tonte classique et n'empêche pas les bordures de démarrer. Rafraîchi automatiquement à l'ouverture de l'onglet et après chaque sauvegarde, avec un bouton pour le rafraîchir manuellement.
 
 ## 9. Widget dashboard
 
