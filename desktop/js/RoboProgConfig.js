@@ -33,6 +33,7 @@ function RoboProg_fillForm(_config) {
     _config = _config || {};
 
     $('#rp_robot_name').val(_config.robot_name || '');
+    RoboProg_updateNotifTitlePlaceholder();
 
     $('#rp_start_cmd_id').val(_config.start_cmd_id || '');
     $('#rp_home_cmd_id').val(_config.home_cmd_id || '');
@@ -274,6 +275,21 @@ $(document).on('click', '.bt_openCmdPicker', function (e) {
             RoboProg_refreshPreview($target);
         }
     });
+});
+
+/* ------------------------------------------------------------------ */
+/* Notifications : titre par défaut suggéré = nom du robot en direct   */
+/* ------------------------------------------------------------------ */
+function RoboProg_updateNotifTitlePlaceholder() {
+    var name = ($('#rp_robot_name').val() || '').trim();
+    var placeholder = name ? (name.toUpperCase() + ' - TONTE') : '(nom du robot) - TONTE';
+    // Met à jour les lignes déjà affichées ET le template caché servant
+    // aux futures lignes ajoutées, pour que tout reste cohérent sans
+    // code supplémentaire dans RoboProg_addNotificationRow.
+    $('#table_notifications .notif_title, .notificationTemplate .notif_title').attr('placeholder', placeholder);
+}
+$(document).on('input', '#rp_robot_name', function () {
+    RoboProg_updateNotifTitlePlaceholder();
 });
 
 /* ------------------------------------------------------------------ */
