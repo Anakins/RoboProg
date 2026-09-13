@@ -286,8 +286,8 @@ class RoboProg extends eqLogic {
             if ($edge_every_day && $config['edge_resume_enabled'] != '1') {
                 $errors[] = "Bordures programmées tous les jours sans relance automatique activée : la tonte classique ne pourrait jamais avoir lieu. Activez la relance automatique, ou laissez au moins un jour sans bordures.";
             }
-            if ($config['edge_resume_enabled'] == '1' && (empty($config['home_cmd_id']) || empty($config['status_cmd_id']) || $config['status_home_value'] === null || $config['status_home_value'] === '')) {
-                $errors[] = "La relance automatique après bordures nécessite : la commande de retour à la maison, la commande Statut, ET d'avoir enregistré la valeur du statut \"à la maison\".";
+            if ($config['edge_resume_enabled'] == '1' && (empty($config['status_cmd_id']) || $config['status_home_value'] === null || $config['status_home_value'] === '')) {
+                $errors[] = "La relance automatique après bordures nécessite : la commande Statut, ET d'avoir enregistré la valeur du statut \"à la maison\".";
             }
         } else {
             if ($config['edge_catchup_enabled'] == '1' || $config['edge_resume_enabled'] == '1') {
@@ -1123,7 +1123,7 @@ class RoboProg extends eqLogic {
             $state['last_edge_date'] = $today;
             $state['current_edge_started_at'] = time();
             $state['rain_interrupt_until'] = null;
-            if ($config['edge_resume_enabled'] == '1' && !empty($config['home_cmd_id']) && !empty($config['status_cmd_id'])) {
+            if ($config['edge_resume_enabled'] == '1' && !empty($config['status_cmd_id'])) {
                 $state['cycle_phase'] = 'edge_in_progress';
                 $state['cycle_phase_since'] = time();
             } else {
@@ -1151,7 +1151,7 @@ class RoboProg extends eqLogic {
                 $state['current_edge_started_at'] = time();
                 $state['rain_interrupt_until'] = null;
                 $state['edge_catchup_pending'] = false; // ce passage couvre aussi un éventuel rattrapage resté en attente
-                if ($config['edge_resume_enabled'] == '1' && !empty($config['home_cmd_id']) && !empty($config['status_cmd_id'])) {
+                if ($config['edge_resume_enabled'] == '1' && !empty($config['status_cmd_id'])) {
                     // Enchaînement sur une tonte classique demandé, même
                     // pour un jour de bordures "normal" (pas un
                     // rattrapage) : on attend le retour du robot avant de
