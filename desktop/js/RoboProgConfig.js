@@ -40,6 +40,7 @@ function RoboProg_fillForm(_config) {
     $('#rp_edge_enabled').prop('checked', _config.edge_cmd_id ? true : false);
     $('#rp_edge_cmd_id').val(_config.edge_cmd_id || '');
     $('#rp_status_cmd_id').val(_config.status_cmd_id || '');
+    RoboProg_refreshHomeStatusCheck(_config); // AVANT les lignes de notification (voir toggleSections/canResume)
     $('#rp_error_cmd_id').val(_config.error_cmd_id || '');
     $('#rp_battery_cmd_id').val(_config.battery_cmd_id || '');
     $('#rp_battery_min_percent').val(_config.battery_min_percent != null ? _config.battery_min_percent : 30);
@@ -90,7 +91,6 @@ function RoboProg_fillForm(_config) {
     }
 
     RoboProg_toggleSections();
-    RoboProg_refreshHomeStatusCheck(_config);
     RoboProg_refreshAllPreviews();
     RoboProg_refreshLatestStart();
     RoboProg_refreshNextMow();
