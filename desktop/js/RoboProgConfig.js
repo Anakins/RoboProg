@@ -172,6 +172,24 @@ $(document).on('input change', '#rp_error_cmd_id', function () {
 /* Aperçu en direct (✅/❌) de chaque commande, même mécanisme que      */
 /* LandroidRTK : un span .cmdValuePreview référencé via data-input.     */
 /* ------------------------------------------------------------------ */
+function RoboProg_appendConditionLabel($preview, rawValue) {
+    var code = rawValue.toString().match(/\d+/);
+    if (!code) {
+        return;
+    }
+    $.ajax({
+        type: 'POST',
+        url: 'plugins/RoboProg/core/ajax/RoboProg.ajax.php',
+        data: {action: 'conditionCodeLabel', apikey: RoboProgApikey, code: code[0]},
+        dataType: 'json',
+        success: function (data) {
+            if (data.state == 'ok' && data.result.label) {
+                $preview.append(' <span class="text-muted">— ' + data.result.label + '</span>');
+            }
+        }
+    });
+}
+
 function RoboProg_appendRainComparison($preview, currentValue, operatorSelector, valueSelector) {
     var operator = $(operatorSelector).val();
     var expected = $(valueSelector).val();
@@ -218,6 +236,9 @@ function RoboProg_refreshPreview($input) {
                 $preview.html('');
             } else if (r.valid) {
                 $preview.html('<span style="color:#3c763d;"><i class="fas fa-check-circle"></i> ' + r.value + '</span>');
+                if (inputId == 'rp_condition_id_cmd_id' && r.value != null) {
+                    RoboProg_appendConditionLabel($preview, r.value);
+                }
                 if (inputId == 'rp_rain_cmd_id' && r.value != null) {
                     RoboProg_appendRainComparison($preview, r.value, '#rp_rain_operator', '#rp_rain_value');
                 }

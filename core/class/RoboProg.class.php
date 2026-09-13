@@ -487,6 +487,84 @@ class RoboProg extends eqLogic {
         array(1000, 1009),
     );
 
+    // Libellés anglais standards OpenWeatherMap (stables depuis des années,
+    // codés en dur car leur page n'est pas exploitable en direct — même
+    // liste que LandroidRTK).
+    public static $OWM_CODE_LABELS = array(
+        200 => 'thunderstorm with light rain', 201 => 'thunderstorm with rain', 202 => 'thunderstorm with heavy rain',
+        210 => 'light thunderstorm', 211 => 'thunderstorm', 212 => 'heavy thunderstorm',
+        221 => 'ragged thunderstorm', 230 => 'thunderstorm with light drizzle', 231 => 'thunderstorm with drizzle', 232 => 'thunderstorm with heavy drizzle',
+        300 => 'light intensity drizzle', 301 => 'drizzle', 302 => 'heavy intensity drizzle',
+        310 => 'light intensity drizzle rain', 311 => 'drizzle rain', 312 => 'heavy intensity drizzle rain',
+        313 => 'shower rain and drizzle', 314 => 'heavy shower rain and drizzle', 321 => 'shower drizzle',
+        500 => 'light rain', 501 => 'moderate rain', 502 => 'heavy intensity rain', 503 => 'very heavy rain',
+        504 => 'extreme rain', 511 => 'freezing rain', 520 => 'light intensity shower rain',
+        521 => 'shower rain', 522 => 'heavy intensity shower rain', 531 => 'ragged shower rain',
+        600 => 'light snow', 601 => 'snow', 602 => 'heavy snow', 611 => 'sleet', 612 => 'light shower sleet',
+        613 => 'shower sleet', 615 => 'light rain and snow', 616 => 'rain and snow',
+        620 => 'light shower snow', 621 => 'shower snow', 622 => 'heavy shower snow',
+        701 => 'mist', 711 => 'smoke', 721 => 'haze', 731 => 'sand/dust whirls', 741 => 'fog',
+        751 => 'sand', 761 => 'dust', 762 => 'volcanic ash', 771 => 'squalls', 781 => 'tornado',
+        800 => 'clear sky', 801 => 'few clouds', 802 => 'scattered clouds', 803 => 'broken clouds', 804 => 'overcast clouds',
+    );
+
+    /**
+     * Retourne le libellé anglais connu d'un code météo (OWM en dur,
+     * WeatherAPI récupéré en direct/mis en cache), ou null si inconnu.
+     * Utilisé pour l'aperçu à côté du champ code météo. Même principe
+     * que LandroidRTK.
+     */
+    public static function getConditionCodeLabel($id) {
+        if (!is_numeric($id)) {
+            return null;
+        }
+        $id = intval($id);
+        if (isset(self::$OWM_CODE_LABELS[$id])) {
+            return self::$OWM_CODE_LABELS[$id] . ' (OpenWeatherMap)';
+        }
+        $labels = self::getWeatherApiCodeLabels();
+        if (isset($labels[$id])) {
+            return $labels[$id] . ' (WeatherAPI)';
+        }
+        return null;
+    }
+
+    /**
+     * Comme LandroidRTK::getWeatherApiCodeLabels() : récupère (avec cache
+     * local d'une semaine) [code => libellé anglais (jour)] depuis le
+     * JSON officiel WeatherAPI, avec repli en dur sur les 4 codes "beau
+     * temps" si l'API est injoignable.
+     */
+    public static function getWeatherApiCodeLabels() {
+        $cache_file = jeedom::getTmpFolder('RoboProg') . '/weatherapi_labels.json';
+        $cache_max_age = 7 * 86400;
+
+        if (file_exists($cache_file) && (time() - filemtime($cache_file)) < $cache_max_age) {
+            $cached = json_decode(file_get_contents($cache_file), true);
+            if (is_array($cached) && !empty($cached)) {
+                return $cached;
+            }
+        }
+
+        $context = stream_context_create(array('http' => array('timeout' => 5)));
+        $raw = @file_get_contents('https://www.weatherapi.com/docs/weather_conditions.json', false, $context);
+        if ($raw !== false) {
+            $data = json_decode($raw, true);
+            if (is_array($data) && !empty($data)) {
+                $labels = array();
+                foreach ($data as $entry) {
+                    if (isset($entry['code']) && !empty($entry['day'])) {
+                        $labels[intval($entry['code'])] = $entry['day'];
+                    }
+                }
+                @file_put_contents($cache_file, json_encode($labels));
+                return $labels;
+            }
+        }
+
+        return array(1000 => 'Sunny', 1003 => 'Partly cloudy', 1006 => 'Cloudy', 1009 => 'Overcast');
+    }
+
     // Vérifie que la condition météo actuelle (code numérique) fait
     // partie de la liste figée ci-dessus. Même principe que LandroidRTK.
     // Emojis standards (indépendants de tout plugin météo), sélectionnés
