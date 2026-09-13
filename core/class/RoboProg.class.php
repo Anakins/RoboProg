@@ -188,7 +188,7 @@ class RoboProg extends eqLogic {
         // Commandes optionnelles : si renseignées, doivent être valides.
         foreach (array(
             'home_cmd_id' => 'Commande de retour à la maison',
-            'edge_cmd_id' => 'Commande pour lancer la tonte des bordures',
+            'edge_cmd_id' => 'Commande pour couper les bordures',
             'status_cmd_id' => 'Commande de statut',
             'error_cmd_id' => "Commande d'erreur",
             'battery_cmd_id' => 'Commande de batterie',
@@ -291,7 +291,7 @@ class RoboProg extends eqLogic {
             }
         } else {
             if ($config['edge_catchup_enabled'] == '1' || $config['edge_resume_enabled'] == '1') {
-                $errors[] = "Les options de bordures nécessitent de lier la commande pour lancer la tonte des bordures.";
+                $errors[] = "Les options de bordures nécessitent de lier la commande pour couper les bordures.";
             }
         }
 

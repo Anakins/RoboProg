@@ -109,7 +109,7 @@ if (!isConnect('admin')) {
             </div>
         </div>
         <div class="form-group" id="fs_edge_cmd" style="display:none;">
-            <label class="col-sm-3 control-label">Commande pour lancer la tonte des bordures</label>
+            <label class="col-sm-3 control-label">Commande pour couper les bordures</label>
             <div class="col-sm-6">
                 <div class="input-group">
                     <input type="text" id="rp_edge_cmd_id" class="form-control">
@@ -185,7 +185,7 @@ if (!isConnect('admin')) {
                     <input type="text" id="rp_time_start_cmd_id" class="form-control" placeholder="ex: #[Extérieur][Météo][Lever du soleil]# ou 800">
                     <span class="input-group-btn"><a class="btn btn-success bt_openCmdPicker" data-target="#rp_time_start_cmd_id" data-cmdtype="info"><i class="fa fa-list-alt"></i></a></span>
                 </div>
-                <span class="help-block">Commande (action ou info) de l'équipement Jeedom, ou heure fixe au format HMM/HHMM (ex: 800 = 08h00).</span>
+                <span class="help-block">Commande info de l'équipement Jeedom, ou heure fixe au format HMM/HHMM (ex: 800 = 08h00).</span>
             </div>
             <div class="col-sm-3" style="padding-top:7px;">
                 <span class="cmdValuePreview text-muted" data-input="#rp_time_start_cmd_id"></span>
