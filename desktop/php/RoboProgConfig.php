@@ -59,7 +59,7 @@ if (!isConnect('admin')) {
             </div>
         </div>
         <div class="form-group">
-            <div class="col-sm-9 col-sm-offset-3">
+            <div class="col-sm-9 col-sm-offset-3" style="clear:both;">
                 <div class="checkbox">
                     <label><input type="checkbox" id="rp_enabled"> Activer la programmation</label>
                 </div>
@@ -101,7 +101,7 @@ if (!isConnect('admin')) {
             </div>
         </div>
         <div class="form-group">
-            <div class="col-sm-9 col-sm-offset-3">
+            <div class="col-sm-9 col-sm-offset-3" style="clear:both;">
                 <div class="checkbox">
                     <label><input type="checkbox" id="rp_edge_enabled"> Mon robot ne fait pas les bordures automatiquement (commande dédiée)</label>
                 </div>
@@ -212,7 +212,7 @@ if (!isConnect('admin')) {
             <div class="col-sm-3" style="padding-top:7px;">
                 <span class="cmdValuePreview text-muted" id="rp_latest_start_preview"></span>
             </div>
-            <div class="col-sm-9 col-sm-offset-3">
+            <div class="col-sm-6 col-sm-offset-3" style="clear:both;">
                 <span class="help-block">Le robot ne démarrera plus une tonte si elle risque de se terminer après (heure de fin − cette marge).</span>
             </div>
         </div>
@@ -253,8 +253,21 @@ if (!isConnect('admin')) {
                 <input type="number" id="rp_humidity_duration_minutes" class="form-control" min="0" style="width:80px;">
                 <span>min</span>
             </div>
-            <div class="col-sm-9 col-sm-offset-3">
+            <div class="col-sm-6 col-sm-offset-3" style="clear:both;">
                 <span class="help-block" id="rp_humidity_duration_help">Le robot pourra démarrer une fois l'humidité repassée sous le seuil pendant ce délai.</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-6 col-sm-offset-3" style="clear:both;">
+                <div class="help-block">
+                    Nécessite un plugin météo tiers fournissant un code numérique de type OpenWeatherMap/WeatherAPI — par exemple
+                    <strong>"Weather Forecast, CAP alerts"</strong> (disponible sur le Market) ou le plugin météo officiel Jeedom.
+                    Ces plugins peuvent aussi fournir l'humidité extérieure à utiliser ci-dessus.
+                    <br><strong>Rappel : le robot ne tond automatiquement que par beau temps</strong>, c'est-à-dire les codes
+                    <a href="https://openweathermap.org/api/weather-conditions" target="_blank">800 à 804 (OpenWeatherMap)</a> ou
+                    <a href="https://www.weatherapi.com/docs/weather_conditions.json" target="_blank">1000 à 1009 (WeatherAPI)</a>
+                    — cliquez sur ces liens pour voir la liste complète des codes de chaque service.
+                </div>
             </div>
         </div>
         <div class="form-group">
@@ -375,7 +388,7 @@ if (!isConnect('admin')) {
                 <input type="number" id="rp_mow_duration_minutes" class="form-control" min="30" max="360" style="width:80px;">
                 <span>min (30 à 360, soit 6h max)</span>
             </div>
-            <div class="col-sm-9 col-sm-offset-3">
+            <div class="col-sm-6 col-sm-offset-3" style="clear:both;">
                 <span class="help-block">Sert à distinguer une vraie pluie pendant la tonte (retour forcé + tonte invalidée) d'une fausse alerte plus tard le même jour, sans rapport avec une tonte déjà terminée depuis longtemps (utile notamment pour les robots sans garage, dont le capteur peut se déclencher des heures après coup). Par défaut : 120 min.</span>
             </div>
         </div>
@@ -417,14 +430,14 @@ if (!isConnect('admin')) {
             </div>
         </div>
         <div class="form-group">
-            <div class="col-sm-9 col-sm-offset-3">
+            <div class="col-sm-9 col-sm-offset-3" style="clear:both;">
                 <div class="checkbox">
                     <label><input type="checkbox" id="rp_edge_catchup_enabled"> Faire les bordures en rattrapage si le dernier passage prévu n'a pas eu lieu</label>
                 </div>
             </div>
         </div>
         <div class="form-group" id="fs_edge_resume">
-            <div class="col-sm-9 col-sm-offset-3">
+            <div class="col-sm-9 col-sm-offset-3" style="clear:both;">
                 <div class="checkbox">
                     <label><input type="checkbox" id="rp_edge_resume_enabled"> Après une coupe de bordures — rattrapage ou jour normal programmé — relancer automatiquement le cycle de tonte classique une fois le robot de retour à la maison (batterie OK)</label>
                 </div>
