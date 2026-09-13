@@ -94,7 +94,7 @@ if (!isConnect('admin')) {
                     <input type="text" id="rp_home_cmd_id" class="form-control">
                     <span class="input-group-btn"><a class="btn btn-success bt_openCmdPicker" data-target="#rp_home_cmd_id" data-cmdtype="action"><i class="fa fa-list-alt"></i></a></span>
                 </div>
-                <span class="help-block">Optionnel, mais nécessaire pour deux usages : 1) rappeler le robot en cas de pluie détectée (nécessite aussi un capteur pluie configuré — sans capteur pluie, la pluie n'est simplement jamais détectée, et cette commande ne sert alors qu'au point 2) ; 2) la relance automatique du cycle classique après un rattrapage de bordures (avec Statut + valeur "à la maison" enregistrée, voir plus bas). Si vous ne voulez pas gérer la pluie du tout, laissez simplement le capteur pluie ET/OU cette commande vides.</span>
+                <span class="help-block">Optionnel. Sert uniquement à rappeler le robot en cas de pluie détectée (nécessite aussi un capteur pluie configuré — sans capteur pluie, la pluie n'est simplement jamais détectée, et cette commande ne sert alors à rien). Elle n'est pas nécessaire pour la relance automatique du cycle classique après bordures : cette dernière repose uniquement sur la commande Statut + la valeur "à la maison" enregistrée (voir plus bas). Si vous ne voulez pas gérer la pluie, laissez simplement le capteur pluie ET/OU cette commande vides.</span>
             </div>
             <div class="col-sm-3" style="padding-top:7px;">
                 <span class="cmdValuePreview text-muted" data-input="#rp_home_cmd_id"></span>
@@ -427,7 +427,7 @@ if (!isConnect('admin')) {
                 <div class="checkbox">
                     <label><input type="checkbox" id="rp_edge_resume_enabled"> Après une coupe de bordures — rattrapage ou jour normal programmé — relancer automatiquement le cycle de tonte classique une fois le robot de retour à la maison (batterie OK)</label>
                 </div>
-                <div class="help-block">Nécessite les commandes de retour à la maison + Statut, et d'avoir enregistré le statut "à la maison" ci-dessus. <strong>Obligatoire si les bordures sont programmées tous les jours</strong> (sinon la tonte classique ne pourrait jamais avoir lieu).</div>
+                <div class="help-block">Nécessite la commande Statut, et d'avoir enregistré le statut "à la maison" ci-dessus. <strong>Obligatoire si les bordures sont programmées tous les jours</strong> (sinon la tonte classique ne pourrait jamais avoir lieu).</div>
             </div>
         </div>
     </fieldset>
