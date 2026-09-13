@@ -58,6 +58,7 @@ function RoboProg_fillForm(_config) {
     $('#rp_humidity_cmd_id').val(_config.humidity_cmd_id || '');
     $('#rp_humidity_threshold').val(_config.humidity_threshold != null ? _config.humidity_threshold : 65);
     $('#rp_humidity_duration_minutes').val(_config.humidity_duration_minutes != null ? _config.humidity_duration_minutes : 180);
+    RoboProg_updateHumidityDurationHelp();
     $('#rp_condition_id_cmd_id').val(_config.condition_id_cmd_id || '');
     $('#rp_condition_cmd_id').val(_config.condition_cmd_id || '');
 
@@ -309,6 +310,21 @@ $(document).on('click', '.bt_openCmdPicker', function (e) {
             RoboProg_refreshPreview($target);
         }
     });
+});
+
+/* ------------------------------------------------------------------ */
+/* Description dynamique du délai d'humidité, avec le seuil en direct  */
+/* ------------------------------------------------------------------ */
+function RoboProg_updateHumidityDurationHelp() {
+    var raw = $('#rp_humidity_threshold').val();
+    var val = parseFloat(raw);
+    var thresholdText = (raw !== '' && raw !== null && !isNaN(val) && val >= 0 && val <= 100) ? (val + '\u00a0%') : 'le seuil';
+    $('#rp_humidity_duration_help').text(
+        'Le robot pourra démarrer une fois l\'humidité repassée sous ' + thresholdText + ' pendant ce délai.'
+    );
+}
+$(document).on('input', '#rp_humidity_threshold', function () {
+    RoboProg_updateHumidityDurationHelp();
 });
 
 /* ------------------------------------------------------------------ */
