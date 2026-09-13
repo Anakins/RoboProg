@@ -44,6 +44,11 @@ try {
         ajax::success(RoboProg::previewValue($raw, $min, $max));
     }
 
+    if (init('action') == 'conditionCodeLabel') {
+        $code = init('code');
+        ajax::success(array('label' => RoboProg::getConditionCodeLabel($code)));
+    }
+
     if (init('action') == 'latestStartPreview') {
         $result = RoboProg::previewLatestStart(init('time_start'), init('time_end'), init('margin_minutes'));
         ajax::success($result);
