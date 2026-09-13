@@ -1,6 +1,6 @@
 # Changelog RoboProg
 
-## Non publié
+## publié
 
 ## 0.2.0 (2026-09-13)
 - **Nouveauté** : le champ "Commande code météo" affiche désormais, comme sur LandroidRTK, le libellé anglais correspondant au code juste à côté de la valeur en direct (ex. `1063 — Patchy rain possible (WeatherAPI)`), en plus du code numérique brut — reconnaît aussi bien les codes OpenWeatherMap (figés en dur) que WeatherAPI (récupérés en direct avec cache local d'une semaine, repli sur une courte liste en dur si l'API est injoignable).
