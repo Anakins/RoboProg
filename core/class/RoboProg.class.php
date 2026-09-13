@@ -539,6 +539,30 @@ class RoboProg extends eqLogic {
     // Chaque ligne n'est ajoutée que si la donnée correspondante est
     // configurée et disponible, exactement comme pour la notification
     // "TONTE" d'origine.
+    // Supprime UNIQUEMENT le tout dernier caractère d'une ligne si c'est
+    // un espace (pas un trim complet : on ne touche pas aux espaces en
+    // début de ligne ni aux espaces internes, qui peuvent servir à aligner
+    // du texte en colonnes). Corrige un bug observé où un espace en tout
+    // dernier caractère d'un message envoyé à Discord (via JeedomBot)
+    // empêche le retour à la ligne suivant de fonctionner.
+    private static function stripTrailingSpace($line) {
+        if (substr($line, -1) === ' ') {
+            return substr($line, 0, -1);
+        }
+        return $line;
+    }
+
+    // Assemble les lignes d'un message en versions HTML (<br/>) et texte
+    // brut (\n), en nettoyant au passage un éventuel espace terminal sur
+    // chaque ligne (voir stripTrailingSpace).
+    private static function buildDualMessage($parts) {
+        $parts = array_map(array(__CLASS__, 'stripTrailingSpace'), $parts);
+        return array(
+            'html'  => implode('<br/>', $parts),
+            'plain' => implode("\n", $parts),
+        );
+    }
+
     private static function buildWeatherLines($config) {
         $lines = array();
         $condition_label = self::getCmdValue($config['condition_cmd_id']);
@@ -1147,18 +1171,16 @@ class RoboProg extends eqLogic {
                         array("✂️🔁 {$config['robot_name']} va d'abord couper les bordures, puis enchaînera sur la tonte classique."),
                         self::buildWeatherLines($config)
                     );
-                    $msg_html = implode('<br/>', $msg_parts);
-                    $msg_plain = implode("\n", $msg_parts);
-                    self::sendNotifications($config, "$name - BORDURES + TONTE", $msg_html, $msg_plain);
+                    $built = self::buildDualMessage($msg_parts);
+                    self::sendNotifications($config, "$name - BORDURES + TONTE", $built['html'], $built['plain']);
                 } else {
                     // Bordures seules, pas d'enchaînement prévu.
                     $msg_parts = array_merge(
                         array("✂️ {$config['robot_name']} va couper les bordures."),
                         self::buildWeatherLines($config)
                     );
-                    $msg_html = implode('<br/>', $msg_parts);
-                    $msg_plain = implode("\n", $msg_parts);
-                    self::sendNotifications($config, "$name - BORDURES", $msg_html, $msg_plain);
+                    $built = self::buildDualMessage($msg_parts);
+                    self::sendNotifications($config, "$name - BORDURES", $built['html'], $built['plain']);
                 }
                 return;
             }
@@ -1171,10 +1193,9 @@ class RoboProg extends eqLogic {
                     array("✂️ {$config['robot_name']} va tondre la pelouse."),
                     self::buildWeatherLines($config)
                 );
-                $msg_html = implode('<br/>', $msg_parts);
-                $msg_plain = implode("\n", $msg_parts);
+                $built = self::buildDualMessage($msg_parts);
                 $name = strtoupper($config['robot_name']);
-                self::sendNotifications($config, "$name - TONTE", $msg_html, $msg_plain);
+                self::sendNotifications($config, "$name - TONTE", $built['html'], $built['plain']);
 
                 $start_cmd->execCmd();
                 $state['last_mow_date'] = $today;
@@ -1273,9 +1294,8 @@ class RoboProg extends eqLogic {
             }
         }
 
-        $msg_html = implode('<br/>', $msg_parts);
-        $msg_plain = implode("\n", $msg_parts);
-        self::sendNotifications($config, "$name - PAS DE TONTE", $msg_html, $msg_plain, 'no_mow');
+        $built = self::buildDualMessage($msg_parts);
+        self::sendNotifications($config, "$name - PAS DE TONTE", $built['html'], $built['plain'], 'no_mow');
         $state['last_notification_reason'] = $reason;
         $state['last_notification_date'] = $today;
         self::saveState($eqLogic, $state);
