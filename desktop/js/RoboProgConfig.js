@@ -115,6 +115,15 @@ function RoboProg_toggleSections() {
     if (!hasEdge) {
         $('#rp_edge_resume_enabled').prop('checked', false);
     }
+
+    // La case "Erreur" par notification n'a de sens que si une commande
+    // Erreur est renseignée (sinon aucune notification d'erreur ne peut
+    // jamais être envoyée) : on la désactive et on la décoche sinon.
+    var hasError = $('#rp_error_cmd_id').val().trim() !== '';
+    $('.notif_error').prop('disabled', !hasError);
+    if (!hasError) {
+        $('.notif_error').prop('checked', false);
+    }
 }
 
 function RoboProg_refreshHomeStatusCheck(_config) {
@@ -130,6 +139,9 @@ $(document).on('change', 'input[name="rp_edge_mode"], #rp_edge_catchup_enabled, 
     RoboProg_toggleSections();
 });
 $(document).on('input change', '#rp_edge_cmd_id', function () {
+    RoboProg_toggleSections();
+});
+$(document).on('input change', '#rp_error_cmd_id', function () {
     RoboProg_toggleSections();
 });
 
@@ -308,6 +320,7 @@ function RoboProg_addNotificationRow(_notif) {
     $tr.find('.notif_edge_resume').prop('checked', _notif.notify_edge_resume == '1');
     $('#table_notifications tbody').append($tr);
     RoboProg_refreshPreview($tr.find('.notif_cmd_id'));
+    RoboProg_toggleSections(); // applique l'état activé/coché de la case "Erreur"
 }
 
 $(document).on('click', '#bt_addNotification', function (e) {

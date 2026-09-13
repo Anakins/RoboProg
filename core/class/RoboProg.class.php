@@ -757,6 +757,59 @@ class RoboProg extends eqLogic {
         }
     }
 
+    /* ---------------------------------------------------------------- */
+    /* Notification d'erreur robot persistante                           */
+    /* ---------------------------------------------------------------- */
+
+    // Appelée à chaque evaluate() (à chaque changement écouté, et à
+    // chaque cycle du cron 5 min) avec le libellé d'erreur actuellement
+    // remonté par la commande "Erreur" ('' ou null si aucune erreur).
+    // N'envoie une notification que si la MÊME erreur persiste depuis au
+    // moins 3 minutes (évite de notifier pour un blocage que le robot
+    // résout tout seul en quelques secondes), et une seule fois par
+    // occurrence (si l'erreur change ou disparaît puis revient, on
+    // recompte 3 minutes avant de renotifier).
+    private static function checkErrorNotification($eqLogic, $config, $error_label) {
+        $state = self::getState($eqLogic);
+        $error_label = trim((string) $error_label);
+
+        if ($error_label === '') {
+            // Plus d'erreur : on repart de zéro pour la prochaine.
+            if ($state['error_pending_label'] !== null || $state['error_notified_label'] !== null) {
+                $state['error_pending_label'] = null;
+                $state['error_pending_since'] = null;
+                $state['error_notified_label'] = null;
+                self::saveState($eqLogic, $state);
+            }
+            return;
+        }
+
+        if ($state['error_pending_label'] !== $error_label) {
+            // Nouvelle erreur (ou changement de libellé) : on démarre le
+            // décompte de 3 minutes, sans notifier tout de suite.
+            $state['error_pending_label'] = $error_label;
+            $state['error_pending_since'] = time();
+            self::saveState($eqLogic, $state);
+            return;
+        }
+
+        if ($state['error_notified_label'] === $error_label) {
+            return; // déjà notifié pour cette occurrence précise
+        }
+
+        if ($state['error_pending_since'] === null || (time() - intval($state['error_pending_since'])) < 180) {
+            return; // pas encore 3 minutes que cette erreur persiste
+        }
+
+        $name = strtoupper($config['robot_name']);
+        $title = "$name - ERREUR";
+        $text = "⚠️ {$config['robot_name']} est en erreur : {$error_label}";
+        self::sendNotifications($config, $title, $text, $text, 'error');
+
+        $state['error_notified_label'] = $error_label;
+        self::saveState($eqLogic, $state);
+    }
+
     /* ================================================================ */
     /* État des conditions (pour affichage type "tableau" côté UI)       */
     /* ================================================================ */
@@ -885,6 +938,14 @@ class RoboProg extends eqLogic {
     public static function evaluate($eqLogic) {
         $config = self::getConfig($eqLogic);
         self::syncWidgetCommands($eqLogic); // garde le widget à jour même si désactivé
+
+        // Notification d'erreur robot persistante : indépendante de la
+        // programmation (fonctionne même si "enabled" == '0').
+        if (!empty($config['error_cmd_id'])) {
+            $error_label = self::getCmdValue($config['error_cmd_id']);
+            self::checkErrorNotification($eqLogic, $config, $error_label);
+        }
+
         if ($config['enabled'] != '1') {
             return;
         }
@@ -1867,7 +1928,7 @@ class RoboProg extends eqLogic {
             $listener->remove();
         }
 
-        $watched_keys = array('rain_cmd_id', 'rain_extra_cmd_id', 'humidity_cmd_id', 'temperature_cmd_id', 'condition_id_cmd_id', 'battery_cmd_id', 'status_cmd_id');
+        $watched_keys = array('rain_cmd_id', 'rain_extra_cmd_id', 'humidity_cmd_id', 'temperature_cmd_id', 'condition_id_cmd_id', 'battery_cmd_id', 'status_cmd_id', 'error_cmd_id');
         $tags = array();
         foreach ($watched_keys as $key) {
             if (!empty($config[$key])) {
