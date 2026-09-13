@@ -116,6 +116,24 @@ function RoboProg_toggleSections() {
         $('#rp_edge_resume_enabled').prop('checked', false);
     }
 
+    // Case "Rattrapage" par notification : n'a de sens que si une
+    // commande de bordures est renseignée (sinon aucun rattrapage de
+    // bordures ne peut jamais avoir lieu).
+    $('.notif_edge_catchup').prop('disabled', !hasEdge);
+    if (!hasEdge) {
+        $('.notif_edge_catchup').prop('checked', false);
+    }
+
+    // Case "Relance" par notification : n'a de sens que si le statut
+    // "à la maison" a été enregistré (avec la commande Statut liée),
+    // sinon la relance automatique après bordures ne peut jamais être
+    // activée et cette notification ne peut donc jamais être envoyée.
+    var canResume = hasEdge && RoboProg_homeStatusRecorded;
+    $('.notif_edge_resume').prop('disabled', !canResume);
+    if (!canResume) {
+        $('.notif_edge_resume').prop('checked', false);
+    }
+
     // La case "Erreur" par notification n'a de sens que si une commande
     // Erreur est renseignée (sinon aucune notification d'erreur ne peut
     // jamais être envoyée) : on la désactive et on la décoche sinon.
@@ -126,13 +144,17 @@ function RoboProg_toggleSections() {
     }
 }
 
+var RoboProg_homeStatusRecorded = false;
+
 function RoboProg_refreshHomeStatusCheck(_config) {
     var recorded = _config && _config.status_home_value !== null && _config.status_home_value !== undefined && _config.status_home_value !== '';
+    RoboProg_homeStatusRecorded = recorded;
     if (recorded) {
         $('#rp_home_status_check').html('<span class="text-success"><i class="fas fa-check-circle"></i> Enregistré : "' + _config.status_home_value + '"</span>');
     } else {
         $('#rp_home_status_check').html('<span class="text-muted"><i class="fas fa-times-circle"></i> Pas encore enregistré</span>');
     }
+    RoboProg_toggleSections();
 }
 
 $(document).on('change', 'input[name="rp_edge_mode"], #rp_edge_catchup_enabled, #rp_edge_enabled', function () {
