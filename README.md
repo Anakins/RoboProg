@@ -26,7 +26,7 @@ Chaque commande supplémentaire liée débloque un bloc de fonctions précis. Ri
 | Commande liée | Débloque |
 |---|---|
 | **Commande de retour à la maison** | Combinée à un **capteur pluie** configuré, elle permet de **rappeler activement le robot** dès que la pluie est détectée (voir section 4). Si vous ne voulez pas du tout gérer la pluie, laissez simplement le capteur pluie et/ou cette commande vides : sans les deux ensemble, le robot ne sera jamais rappelé automatiquement. |
-| **Commande pour lancer la tonte des bordures** | À cocher uniquement si votre robot **ne coupe pas les bordures automatiquement à chaque tonte** et nécessite une commande séparée. Une case dédiée ("Mon robot ne fait pas les bordures automatiquement") révèle le champ de commande et toute la section "Programmation des bordures" (section 5). |
+| **Commande pour couper les bordures** | À cocher uniquement si votre robot **ne coupe pas les bordures automatiquement à chaque tonte** et nécessite une commande séparée. Une case dédiée ("Mon robot ne fait pas les bordures automatiquement") révèle le champ de commande et toute la section "Programmation des bordures" (section 5). |
 | **Commande de statut** + valeur "à la maison" enregistrée | La détection fiable du retour à la base. Nécessaire, seule, pour la relance automatique après bordures. |
 | **Commande de batterie** | Une vérification de sécurité (seuil configurable) avant CHAQUE envoi de commande de démarrage (tonte classique, bordures, rattrapage, relance) — pas seulement une fois, mais systématiquement, via une fonction unique partagée par tous les déclenchements. Sans cette commande, RoboProg envoie ses commandes sans jamais vérifier la batterie : si le robot refuse de partir faute de charge suffisante, RoboProg n'en saura rien et considérera à tort la tonte comme lancée. |
 | **Commande d'erreur** | Affiche la dernière erreur signalée par le robot (n'importe quelle valeur est acceptée, y compris vide), et peut être ajoutée aux destinataires de notifications pour être alertée en cas de souci. |
@@ -55,9 +55,9 @@ Commande Jeedom ou heure fixe pour le début/la fin au format `HMM`/`HHMM`), mar
 
 ## 5. Programmation des bordures
 
-⚠️ **Cette fonctionnalité ne concerne que les robots qui ne font pas systématiquement les bordures à chaque tonte.** Certains robots intègrent la coupe des bordures automatiquement dans chaque cycle de tonte classique (pas besoin de cette section, ni même de lier la commande pour lancer la tonte des bordures). D'autres — c'est pour ceux-là que cette section existe — ne coupent les bordures que sur demande explicite, via une commande dédiée et séparée du démarrage classique. Si votre robot fait partie de la première catégorie, ignorez purement et simplement cette section (ne liez pas la commande pour lancer la tonte des bordures, et rien ne s'affichera).
+⚠️ **Cette fonctionnalité ne concerne que les robots qui ne font pas systématiquement les bordures à chaque tonte.** Certains robots intègrent la coupe des bordures automatiquement dans chaque cycle de tonte classique (pas besoin de cette section, ni même de lier la commande pour couper les bordures). D'autres — c'est pour ceux-là que cette section existe — ne coupent les bordures que sur demande explicite, via une commande dédiée et séparée du démarrage classique. Si votre robot fait partie de la première catégorie, ignorez purement et simplement cette section (ne liez pas la commande pour couper les bordures, et rien ne s'affichera).
 
-Visible uniquement si la commande pour lancer la tonte des bordures est liée.
+Visible uniquement si la commande pour couper les bordures est liée.
 
 - **Mode** : soit des **jours de la semaine** fixes (cases à cocher), soit un **intervalle** en jours (1 à 7 — 7 = toutes les semaines). Ce cycle est indépendant de l'espacement de la tonte classique : les bordures se déclenchent sur leur propre cadence, même un jour où la tonte classique n'est pas due.
 - **Rattrapage** (case à cocher) : si le jour prévu pour les bordures est manqué (conditions météo non réunies toute la journée), le rattrapage se fait automatiquement — **uniquement le jour où une tonte classique était de toute façon prévue** (espacement respecté). Il remplace alors la tonte classique de ce jour-là par les bordures. Si ce jour de rattrapage est lui-même bloqué par la météo, rien ne se passe et le rattrapage reste en attente pour le prochain jour de tonte classique valide (retenté automatiquement, jour après jour, tant qu'il n'a pas pu avoir lieu).
@@ -91,7 +91,7 @@ Boutons Activer/Désactiver la programmation, curseurs réglables (marge, espace
 ## 10. Aperçus en direct (✅/❌)
 
 À côté de chaque champ de commande, un petit indicateur s'affiche automatiquement dès que vous renseignez ou modifiez la valeur :
-- ✅ vert : commande trouvée. Pour les commandes **info**, la valeur actuelle est affichée (et vérifiée par rapport aux bornes attendues si applicable — ex: batterie entre 0 et 100). Pour les commandes **action** (Commande pour lancer la tonte, Commande de retour à la maison, Commande pour lancer la tonte des bordures), il confirme juste que la commande existe (impossible d'en afficher une "valeur" sans l'exécuter réellement, ce que RoboProg ne fait jamais pendant un simple aperçu).
+- ✅ vert : commande trouvée. Pour les commandes **info**, la valeur actuelle est affichée (et vérifiée par rapport aux bornes attendues si applicable — ex: batterie entre 0 et 100). Pour les commandes **action** (Commande pour lancer la tonte, Commande de retour à la maison, Commande pour couper les bordures), il confirme juste que la commande existe (impossible d'en afficher une "valeur" sans l'exécuter réellement, ce que RoboProg ne fait jamais pendant un simple aperçu).
 - ❌ rouge : commande introuvable, ou valeur hors des bornes attendues.
 
 ## 11. Outils de débogage
