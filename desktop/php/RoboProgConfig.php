@@ -436,7 +436,7 @@ if (!isConnect('admin')) {
     <fieldset>
         <legend><i class="fas fa-bell"></i> Notifications</legend>
         <ul style="margin:0 0 10px 15px; padding:0; font-size:0.9em; color:#666;">
-            <li><b>Pas de tonte</b> : envoyée en fin de journée si la tonte classique n'a pas pu avoir lieu.</li>
+            <li><b>Pas de tonte</b> : envoyée en fin de journée si aucune tonte n'a pu avoir lieu.</li>
             <li><b>Erreur</b> : envoyée si le robot signale une erreur (commande Erreur liée).</li>
             <li><b>Rattrapage</b> : envoyée quand des bordures manquées sont rattrapées.</li>
             <li><b>Relance</b> : envoyée quand la tonte classique redémarre automatiquement après des bordures.</li>

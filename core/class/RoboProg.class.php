@@ -1156,7 +1156,14 @@ class RoboProg extends eqLogic {
                 self::saveState($eqLogic, $state);
                 log::add('RoboProg', 'info', $config['robot_name'] . " : bordures dues aujourd'hui mais non faites, rattrapage programmé.");
             }
-            self::notifyNotReadyIfNeeded($eqLogic, $config, $state, $today, $now_minutes, $latest_start, $spacing_ok);
+            // Si les bordures ont eu lieu aujourd'hui (même sans relance
+            // de la tonte classique, par ex. si la relance a été
+            // abandonnée après le délai de sécurité de 4h), le robot a
+            // bien fait quelque chose aujourd'hui : pas de notification
+            // "pas de tonte" dans ce cas.
+            if ($state['last_edge_date'] !== $today) {
+                self::notifyNotReadyIfNeeded($eqLogic, $config, $state, $today, $now_minutes, $latest_start, $spacing_ok);
+            }
             return;
         }
 
@@ -1296,7 +1303,7 @@ class RoboProg extends eqLogic {
         return $h * 60 + $m;
     }
 
-    // Notification de fin de journée si la tonte classique n'a pas pu
+    // Notification de fin de journée si aucune tonte n'a pu
     // avoir lieu (mêmes principes que LandroidRTK : une fois la fenêtre
     // fermée, une seule fois par jour ; même structure multi-lignes que
     // la notification de démarrage — annonce → météo → température →
