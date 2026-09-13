@@ -249,10 +249,14 @@ if (!isConnect('admin')) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label">Délai d'humidité</label>
+            <label class="col-sm-3 control-label">Délai d'humidité sous ce seuil</label>
             <div class="col-sm-6" style="display:flex; align-items:center; gap:8px;">
                 <input type="number" id="rp_humidity_duration_minutes" class="form-control" min="0" style="width:80px;">
                 <span>min</span>
+            </div>
+            <div class="col-sm-3"></div>
+            <div class="col-sm-9">
+                <span class="help-block" id="rp_humidity_duration_help">Le robot pourra démarrer une fois l'humidité repassée sous le seuil pendant ce délai.</span>
             </div>
         </div>
         <div class="form-group">
