@@ -575,20 +575,20 @@ $(document).on('click', '#bt_saveConfig', function (e) {
                 return;
             }
             if (data.result.errors && data.result.errors.length) {
-                config.enabled = '0';
                 $('#rp_enabled').prop('checked', false);
                 $('#div_alert').removeClass('alert-success').addClass('alert-danger')
                     .html('<b>{{Configuration enregistrée, mais désactivée automatiquement car invalide}} :</b><br>' + data.result.errors.join('<br>')).show();
+                RoboProg_load();
                 return;
             }
             $('#div_alert').removeClass('alert-danger').addClass('alert-success').html('{{Configuration enregistrée}}').show();
-            RoboProg_fillForm(config);
-            if (config.enabled == '1') {
-                $('#rp_conditions_status').show();
-                RoboProg_loadConditionsStatus();
-            } else {
-                $('#rp_conditions_status').hide();
-            }
+            // Recharge depuis le serveur plutôt que de réafficher l'objet
+            // local construit depuis le formulaire : certains champs (ex.
+            // le statut "à la maison" enregistré via son propre bouton)
+            // ne font pas partie du formulaire et seraient sinon affichés
+            // à tort comme perdus juste après la sauvegarde, alors qu'ils
+            // sont bien conservés côté serveur (visible après un F5).
+            RoboProg_load();
         }
     });
 });
