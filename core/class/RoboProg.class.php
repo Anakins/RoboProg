@@ -1064,8 +1064,12 @@ class RoboProg extends eqLogic {
                 self::saveState($eqLogic, $state);
                 log::add('RoboProg', 'warning', $config['robot_name'] . " : retour à la maison sous la pluie pendant les bordures — probablement interrompues, rattrapage programmé.");
                 $name = strtoupper($config['robot_name']);
-                $text = "🌧️✂️ {$config['robot_name']} est rentré sous la pluie pendant les bordures (probablement interrompues) : un rattrapage est programmé, la tonte classique n'est pas relancée.";
-                self::sendNotifications($config, "$name - RATTRAPAGE INTERROMPU", $text, $text, 'edge_catchup');
+                $msg_parts = array_merge(
+                    array("🌧️✂️ {$config['robot_name']} est rentré sous la pluie pendant les bordures (probablement interrompues) : un rattrapage est programmé, la tonte classique n'est pas relancée."),
+                    self::buildWeatherLines($config)
+                );
+                $built = self::buildDualMessage($msg_parts);
+                self::sendNotifications($config, "$name - RATTRAPAGE INTERROMPU", $built['html'], $built['plain'], 'edge_catchup');
                 return;
             }
             if ($home === true && self::allConditionsOk($config, $state)) {
@@ -1080,8 +1084,12 @@ class RoboProg extends eqLogic {
                     self::saveState($eqLogic, $state);
                     log::add('RoboProg', 'info', $config['robot_name'] . " : bordures terminées, relance du cycle de tonte classique.");
                     $name = strtoupper($config['robot_name']);
-                    $text = "▶️🔁 {$config['robot_name']} a terminé les bordures et repart pour la tonte classique.";
-                    self::sendNotifications($config, "$name - RELANCE TONTE", $text, $text, 'edge_resume');
+                    $msg_parts = array_merge(
+                        array("▶️🔁 {$config['robot_name']} a terminé les bordures et repart pour la tonte classique."),
+                        self::buildWeatherLines($config)
+                    );
+                    $built = self::buildDualMessage($msg_parts);
+                    self::sendNotifications($config, "$name - RELANCE TONTE", $built['html'], $built['plain'], 'edge_resume');
                 }
             }
             return; // tant qu'on attend, on ne fait rien d'autre ce tour-ci
@@ -1281,8 +1289,12 @@ class RoboProg extends eqLogic {
             self::saveState($eqLogic, $state);
             log::add('RoboProg', 'info', $config['robot_name'] . " : rattrapage des bordures déclenché.");
             $name = strtoupper($config['robot_name']);
-            $text = "✂️🔁 {$config['robot_name']} effectue un rattrapage de bordures (dernier passage manqué).";
-            self::sendNotifications($config, "$name - RATTRAPAGE BORDURES", $text, $text, 'edge_catchup');
+            $msg_parts = array_merge(
+                array("✂️🔁 {$config['robot_name']} effectue un rattrapage de bordures (dernier passage manqué)."),
+                self::buildWeatherLines($config)
+            );
+            $built = self::buildDualMessage($msg_parts);
+            self::sendNotifications($config, "$name - RATTRAPAGE BORDURES", $built['html'], $built['plain'], 'edge_catchup');
             return;
         }
 

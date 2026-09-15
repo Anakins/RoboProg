@@ -10,8 +10,13 @@
     "documentation_beta": "https://github.com/Anakins/RoboProg/tree/beta",
     "issue": "https://github.com/Anakins/RoboProg/issues",
     "category": "programming",
+<<<<<<< HEAD
     "state": "stable",
-    "pluginVersion": "0.2.0",
+    "pluginVersion": "0.3.0",
+=======
+    "state": "experimental",
+    "pluginVersion": "0.3.0",
+>>>>>>> 8ac69d0 (Amélioration notifications)
     "language": ["fr_FR"],
     "compatibility": ["smart", "rpi", "docker", "diy", "mobile"],
     "requirement": {
