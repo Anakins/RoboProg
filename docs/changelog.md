@@ -1,6 +1,7 @@
 # Changelog RoboProg
 
-## Non publié
+## 0.3.0 (2026-09-15)
+- **Amélioration** : les notifications "RATTRAPAGE BORDURES", "RATTRAPAGE INTERROMPU" et "RELANCE TONTE" affichent désormais les mêmes informations détaillées (météo avec emoji, température, humidité, batterie) que les notifications "TONTE" et "BORDURES", via `buildWeatherLines()`/`buildDualMessage()` — elles ne contenaient jusqu'ici qu'une simple phrase unique, contrairement au reste des notifications de démarrage.
 - **Bug corrigé (vraie cause de la fuite de mise en page)** : le bandeau d'aide météo n'était pas encapsulé dans un `<div class="form-group">` comme tous les autres blocs — hors c'est justement le `form-group` (via le clearfix de `.row` que Bootstrap lui applique) qui empêche les colonnes flottantes de "fuiter" sur le champ suivant. Étant orphelin, il laissait le champ "Commande code météo" juste après se retrouver mal positionné (aperçu collé à droite, retour à la ligne erratique). Corrigé en l'encapsulant dans son propre `form-group`.
 - **Ajustement (largeur, généralisé)** : réduction de `col-sm-9` à `col-sm-6` sur **toutes** les descriptions de champ restantes ("Marge avant l'heure de fin", "Durée de tonte estimée") pour qu'elles s'arrêtent à la largeur de la colonne de saisie, comme demandé — les cases à cocher (Activer la programmation, bordures, rattrapage, relance) restent en `col-sm-9` puisqu'elles ne sont pas de simples descriptions sous un champ.
 - **Ajustement (largeur)** : les deux blocs "Délai d'humidité sous ce seuil" et "Nécessite un plugin météo tiers" s'étendaient jusqu'au bord droit de la page (`col-sm-9`). Réduits à `col-sm-6`, pour s'arrêter à la même largeur que la colonne des champs de saisie, avant la colonne d'aperçu/coche.

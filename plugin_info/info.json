@@ -11,7 +11,7 @@
     "issue": "https://github.com/Anakins/RoboProg/issues",
     "category": "programming",
     "state": "stable",
-    "pluginVersion": "0.2.0",
+    "pluginVersion": "0.3.0",
     "language": ["fr_FR"],
     "compatibility": ["smart", "rpi", "docker", "diy", "mobile"],
     "requirement": {
