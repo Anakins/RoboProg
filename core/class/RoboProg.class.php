@@ -1065,7 +1065,7 @@ class RoboProg extends eqLogic {
                 log::add('RoboProg', 'warning', $config['robot_name'] . " : retour à la maison sous la pluie pendant les bordures — probablement interrompues, rattrapage programmé.");
                 $name = strtoupper($config['robot_name']);
                 $msg_parts = array_merge(
-                    array("🌧️✂️ {$config['robot_name']} est rentré sous la pluie pendant les bordures (probablement interrompues) : un rattrapage est programmé, la tonte classique n'est pas relancée."),
+                    array("🌧️🔁 {$config['robot_name']} est rentré sous la pluie pendant les bordures (probablement interrompues) : un rattrapage est programmé, la tonte classique n'est pas relancée."),
                     self::buildWeatherLines($config)
                 );
                 $built = self::buildDualMessage($msg_parts);
@@ -1085,7 +1085,7 @@ class RoboProg extends eqLogic {
                     log::add('RoboProg', 'info', $config['robot_name'] . " : bordures terminées, relance du cycle de tonte classique.");
                     $name = strtoupper($config['robot_name']);
                     $msg_parts = array_merge(
-                        array("▶️🔁 {$config['robot_name']} a terminé les bordures et repart pour la tonte classique."),
+                        array("✂️▶️ {$config['robot_name']} a terminé les bordures et repart pour la tonte classique."),
                         self::buildWeatherLines($config)
                     );
                     $built = self::buildDualMessage($msg_parts);
@@ -1134,7 +1134,7 @@ class RoboProg extends eqLogic {
                 self::saveState($eqLogic, $state);
                 log::add('RoboProg', 'warning', $config['robot_name'] . " : pluie détectée pendant la tonte — retour à la maison demandé (si commande configurée), tonte invalidée et retentée plus tard.");
                 $name = strtoupper($config['robot_name']);
-                $text = "🌧️ {$config['robot_name']} rentre à la maison à cause de la pluie. La tonte en cours est annulée et sera retentée plus tard.";
+                $text = "🌧️✂️ {$config['robot_name']} rentre à la maison à cause de la pluie. La tonte en cours est annulée et sera retentée plus tard.";
                 self::sendNotifications($config, "$name - PLUIE", $text, $text);
             } elseif ($during_edge) {
                 $state['current_edge_started_at'] = null;
@@ -1142,7 +1142,7 @@ class RoboProg extends eqLogic {
                 self::saveState($eqLogic, $state);
                 log::add('RoboProg', 'warning', $config['robot_name'] . " : pluie détectée pendant les bordures — retour à la maison demandé, rattrapage programmé.");
                 $name = strtoupper($config['robot_name']);
-                $text = "🌧️✂️ {$config['robot_name']} rentre à la maison à cause de la pluie pendant les bordures. Un rattrapage est programmé.";
+                $text = "🌧️🔁 {$config['robot_name']} rentre à la maison à cause de la pluie pendant les bordures. Un rattrapage est programmé.";
                 self::sendNotifications($config, "$name - PLUIE", $text, $text, 'edge_catchup');
             }
             return;

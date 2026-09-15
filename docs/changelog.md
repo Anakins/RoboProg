@@ -1,5 +1,8 @@
 # Changelog RoboProg
 
+## 0.4.0 (2026-09-15)
+- **Ajustement (emojis)** : cohérence des emojis en début de message pour les notifications liées à la pluie/bordures/relance. "Relance tonte" (bordures → reprise classique) : `▶️🔁` → `✂️▶️`. "Pluie pendant les bordures" (deux cas : coupe en cours, et attente de retour avant relance) : `🌧️✂️` → `🌧️🔁`. "Pluie pendant la tonte classique" (pas pendant les bordures) : `🌧️` → `🌧️✂️`. Principe : ✂️ = action de couper (tonte ou bordures), 🔁 = un cycle à recommencer plus tard.
+
 ## 0.3.0 (2026-09-15)
 - **Amélioration** : les notifications "RATTRAPAGE BORDURES", "RATTRAPAGE INTERROMPU" et "RELANCE TONTE" affichent désormais les mêmes informations détaillées (météo avec emoji, température, humidité, batterie) que les notifications "TONTE" et "BORDURES", via `buildWeatherLines()`/`buildDualMessage()` — elles ne contenaient jusqu'ici qu'une simple phrase unique, contrairement au reste des notifications de démarrage.
 - **Bug corrigé (vraie cause de la fuite de mise en page)** : le bandeau d'aide météo n'était pas encapsulé dans un `<div class="form-group">` comme tous les autres blocs — hors c'est justement le `form-group` (via le clearfix de `.row` que Bootstrap lui applique) qui empêche les colonnes flottantes de "fuiter" sur le champ suivant. Étant orphelin, il laissait le champ "Commande code météo" juste après se retrouver mal positionné (aperçu collé à droite, retour à la ligne erratique). Corrigé en l'encapsulant dans son propre `form-group`.
