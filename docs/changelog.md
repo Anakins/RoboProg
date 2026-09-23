@@ -1,5 +1,11 @@
 # Changelog RoboProg
 
+## 0.6.0 (2026-09-23)
+- **Bug corrigé (bloquant, vraie cause trouvée)** : le passage en `private static` de `$GOOD_WEATHER_RANGES`/`$OWM_CODE_LABELS` (0.5.0) n'a en réalité rien résolu — confirmé par test direct sur le serveur (fichier à jour, VM entièrement redémarrée, erreur strictement identique). Cause réelle, vérifiée par un test de réflexion PHP isolé : Jeedom parcourt les propriétés de la classe via `ReflectionClass::getProperties()`, qui **voit aussi bien le `static` privé que public** — la visibilité n'y change rien. Corrigé cette fois en transformant ces deux tableaux en **constantes de classe** (`const`) plutôt qu'en propriétés statiques : une constante n'est structurellement pas une "propriété" pour l'API de réflexion (`getProperties()` ne peut pas la voir, seule `getConstants()` le peut), ce qui règle le problème à la racine.
+
+## 0.5.0 (2026-09-23)
+- **Bug corrigé (bloquant)** : l'ajout du premier équipement RoboProg échouait avec l'erreur SQL `Unknown column 'GOOD_WEATHER_RANGES' in 'field list'`. En cause : `$GOOD_WEATHER_RANGES` et `$OWM_CODE_LABELS` (tableaux de correspondance météo, ajoutés en 0.2.0) étaient déclarées `public static` — Jeedom construit sa requête de sauvegarde de l'équipement en parcourant toutes les propriétés publiques de la classe (y compris statiques) pour les mapper aux colonnes de la table `eqLogic`, et tentait donc de les insérer comme si c'étaient des colonnes réelles. Corrigé en les passant en `private static` (usage strictement interne, aucun impact fonctionnel).
+
 ## 0.4.0 (2026-09-15)
 - **Ajustement (emojis)** : cohérence des emojis en début de message pour les notifications liées à la pluie/bordures/relance. "Relance tonte" (bordures → reprise classique) : `▶️🔁` → `✂️▶️`. "Pluie pendant les bordures" (deux cas : coupe en cours, et attente de retour avant relance) : `🌧️✂️` → `🌧️🔁`. "Pluie pendant la tonte classique" (pas pendant les bordures) : `🌧️` → `🌧️✂️`. Principe : ✂️ = action de couper (tonte ou bordures), 🔁 = un cycle à recommencer plus tard.
 
