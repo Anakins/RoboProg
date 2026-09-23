@@ -482,15 +482,24 @@ class RoboProg extends eqLogic {
 
     // Familles de codes météo "temps sec/dégagé" — exactement les mêmes
     // plages que LandroidRTK (figées en dur, pas configurables).
-    public static $GOOD_WEATHER_RANGES = array(
+    // IMPORTANT : déclarées en "const" et non en propriété statique — le
+    // cœur de Jeedom (eqLogic) construit sa requête SQL de sauvegarde en
+    // parcourant les propriétés de la classe via la réflexion PHP, sans
+    // filtrer par visibilité ni exclure le statique ; même en "private
+    // static" ces tableaux étaient donc détectés à tort comme des
+    // colonnes à insérer ("Unknown column 'GOOD_WEATHER_RANGES'..."). Une
+    // constante de classe n'est structurellement pas une "propriété" pour
+    // l'API de réflexion (getProperties() ne peut pas la voir), donc ce
+    // problème ne peut plus se produire.
+    const GOOD_WEATHER_RANGES = array(
         array(800, 804),
         array(1000, 1009),
     );
 
     // Libellés anglais standards OpenWeatherMap (stables depuis des années,
     // codés en dur car leur page n'est pas exploitable en direct — même
-    // liste que LandroidRTK).
-    public static $OWM_CODE_LABELS = array(
+    // liste que LandroidRTK). Voir la remarque ci-dessus sur le "const".
+    const OWM_CODE_LABELS = array(
         200 => 'thunderstorm with light rain', 201 => 'thunderstorm with rain', 202 => 'thunderstorm with heavy rain',
         210 => 'light thunderstorm', 211 => 'thunderstorm', 212 => 'heavy thunderstorm',
         221 => 'ragged thunderstorm', 230 => 'thunderstorm with light drizzle', 231 => 'thunderstorm with drizzle', 232 => 'thunderstorm with heavy drizzle',
@@ -519,8 +528,8 @@ class RoboProg extends eqLogic {
             return null;
         }
         $id = intval($id);
-        if (isset(self::$OWM_CODE_LABELS[$id])) {
-            return self::$OWM_CODE_LABELS[$id] . ' (OpenWeatherMap)';
+        if (isset(self::OWM_CODE_LABELS[$id])) {
+            return self::OWM_CODE_LABELS[$id] . ' (OpenWeatherMap)';
         }
         $labels = self::getWeatherApiCodeLabels();
         if (isset($labels[$id])) {
@@ -675,7 +684,7 @@ class RoboProg extends eqLogic {
             return false;
         }
         $id = intval($condition_id);
-        foreach (self::$GOOD_WEATHER_RANGES as $range) {
+        foreach (self::GOOD_WEATHER_RANGES as $range) {
             if ($id >= $range[0] && $id <= $range[1]) {
                 return true;
             }
